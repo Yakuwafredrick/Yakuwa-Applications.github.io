@@ -1,0 +1,90 @@
+
+/* General body styling */
+body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Make body take at least full viewport height */
+    margin: 0;
+    background-color: #f0f2f5; /* Light grey background */
+    color: #333;
+}
+
+/* Chat Container */
+.chat-container {
+    width: 100%;
+    max-width: 450px; /* Max width for a typical chat window */
+    height: 80vh; /* Take up 80% of viewport height */
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    display: flex;
+    flex-direction: column; /* Stack messages and input vertically */
+    overflow: hidden; /* Hide anything outside the container */
+}
+
+/* Messages Display Area */
+.messages-display {
+    flex-grow: 1; /* Allows it to take up available space */
+    padding: 15px;
+    overflow-y: auto; /* Enable vertical scrolling */
+    border-bottom: 1px solid #eee; /* Separator from input area */
+    display: flex;
+    flex-direction: column; /* Stack messages */
+}
+
+/* Individual Message Styles (for messages we'll add with JS) */
+.message {
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 15px;
+    max-width: 80%; /* Don't let messages take full width */
+    word-wrap: break-word; /* Prevent long words from overflowing */
+}
+
+.message.sent {
+    background-color: #007bff; /* Blue for sent messages */
+    color: white;
+    align-self: flex-end; /* Align to the right for sent messages */
+    border-bottom-right-radius: 2px; /* A little visual flair */
+}
+
+.message.received {
+    background-color: #e4e6eb; /* Light grey for received messages */
+    color: #333;
+    align-self: flex-start; /* Align to the left for received messages */
+    border-bottom-left-radius: 2px; /* A little visual flair */
+}
+
+/* Message Input Area */
+.message-input-area {
+    display: flex;
+    padding: 15px;
+    gap: 10px; /* Space between input and button */
+    border-top: 1px solid #eee; /* Optional: A line at the top */
+}
+
+.message-input-area input {
+    flex-grow: 1; /* Input field takes up most space */
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 20px; /* Rounded input field */
+    font-size: 1em;
+    outline: none; /* Remove blue outline on focus */
+}
+
+.message-input-area button {
+    padding: 10px 20px;
+    background-color: #007bff; /* Blue send button */
+    color: white;
+    border: none;
+    border-radius: 20px; /* Rounded button */
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s ease; /* Smooth hover effect */
+}
+
+.message-input-area button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
