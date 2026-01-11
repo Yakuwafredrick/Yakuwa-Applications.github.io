@@ -1,14 +1,15 @@
 /*************************************************
- * CHAT APP A – OFFLINE FIRST + AUTO SYNC
+ * CHAT APP A – OFFLINE FIRST + AUTO SYNC (FINAL)
  *************************************************/
 
 const APP_ID = 'AppA';
 const TARGET_APP_ID = 'AppB';
-const SERVER_URL = 'https://yourserver.com/sync'; // 🔴 CHANGE THIS
+const SERVER_URL = 'https://chat-sync-server.onrender.com/sync';
 
 // Storage keys
 const HISTORY_KEY = `${APP_ID}_history`;
 const OUTBOX_KEY = `${APP_ID}_outbox`;
+const LAST_SYNC_KEY = `${APP_ID}_last_sync`;
 
 // DOM
 const messagesDisplay = document.getElementById('messagesDisplay');
@@ -16,7 +17,7 @@ const messageInput = document.getElementById('messageInput');
 const sendButton = document.getElementById('sendButton');
 
 /* =========================
-   UI FUNCTIONS
+   UI
 ========================= */
 function displayMessage(text, sender) {
   const div = document.createElement('div');
@@ -45,15 +46,16 @@ function queueMessage(text) {
   outbox.push({
     id: crypto.randomUUID(),
     text,
+    from: APP_ID,
     to: TARGET_APP_ID,
-    sent: false,
-    time: Date.now()
+    time: Date.now(),
+    sent: false
   });
   localStorage.setItem(OUTBOX_KEY, JSON.stringify(outbox));
 }
 
 /* =========================
-   SEND MESSAGE (OFFLINE)
+   SEND MESSAGE (OFFLINE SAFE)
 ========================= */
 function sendMessage() {
   const text = messageInput.value.trim();
@@ -74,7 +76,6 @@ async function syncMessages() {
 
   const outbox = JSON.parse(localStorage.getItem(OUTBOX_KEY) || '[]');
   const pending = outbox.filter(m => !m.sent);
-  if (!pending.length) return;
 
   try {
     const res = await fetch(SERVER_URL, {
@@ -82,26 +83,30 @@ async function syncMessages() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         from: APP_ID,
-        messages: pending
+        to: TARGET_APP_ID,
+        lastSync: localStorage.getItem(LAST_SYNC_KEY),
+        outgoing: pending
       })
     });
 
     const data = await res.json();
 
-    // mark sent
-    pending.forEach(m => m.sent = true);
+    // Mark sent messages
+    pending.forEach(m => (m.sent = true));
     localStorage.setItem(OUTBOX_KEY, JSON.stringify(outbox));
 
-    // receive messages
-    if (data.incoming) {
+    // Receive new messages
+    if (Array.isArray(data.incoming)) {
       data.incoming.forEach(m => {
         displayMessage(m.text, 'received');
         saveHistory(m.text, 'received');
       });
     }
 
-  } catch (e) {
-    console.log('Sync failed, will retry');
+    localStorage.setItem(LAST_SYNC_KEY, Date.now());
+
+  } catch {
+    console.log('Sync failed – offline or server asleep');
   }
 }
 
@@ -114,7 +119,8 @@ messageInput.addEventListener('keypress', e => {
 });
 
 window.addEventListener('online', syncMessages);
-setInterval(syncMessages, 5000);
+setInterval(syncMessages, 4000);
 
 // Start
 loadHistory();
+syncMessages();
